@@ -48,6 +48,16 @@ def bot():
   # 잠시 대기 
   time.sleep(3)
 
+  # 로그인 정보 남기지 않도록 하기
+  not_save = driver.find_element_by_xpath('/html/body/div[1]/section/main/div/div/div/div/button[1]')
+  not_save.click()
+  time.sleep(1)
+
+  # 알림 설정 나중에 하기
+  alert_later = driver.find_element_by_xpath('/html/body/div[5]/div/div/div/div[3]/button[2]')
+  alert_later.click()
+  time.sleep(1)
+
   # 5. 인기게시물 첫번째 피드 선택
   first_feed = driver.find_element_by_xpath('//*[@id="react-root"]/section/main/article/div[1]/div/div/div[1]/div[1]/a/div/div[2]') 
   first_feed.click() 
