@@ -15,12 +15,13 @@ def bot():
   #크롬드라이버 로딩 
   options = webdriver.ChromeOptions() 
   options.add_argument('--disable-gpu') 
-  options.add_argument('user-agent=Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Safari/537.36')
 
   current_folder = os.path.realpath( os.path.abspath(os.path.split(inspect.getfile(inspect.currentframe()))[0])) 
   if platform.system() == 'Windows': 
+    options.add_argument('user-agent=Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Safari/537.36')
     driver_path = os.path.join(current_folder, 'chromedriver.exe') 
   else: 
+    options.add_argument('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.80 Safari/537.36')
     driver_path = os.path.join(current_folder, 'chromedriver') 
   
   driver = webdriver.Chrome(driver_path, options=options) 
@@ -39,7 +40,7 @@ def bot():
     id_input.send_keys(insta_id) #아이디 입력 
   except:
     id_input = driver.find_element_by_xpath('/html/body/div[1]/div/div/section/main/article/div[2]/div[1]/div/form/div/div[1]/div/label/input') 
-    id_input.click() #입력창 클릭 
+    id_input.click() #입력창 클릭       
     id_input.send_keys(insta_id) #아이디 입력 
   
   # 2-1. 패스워드 입력창을 찾아서 위에서 입력받은 패스워드(insta_pw)값 입력 
@@ -76,28 +77,20 @@ def bot():
   # 5. 인기게시물 첫번째 피드 선택
   first_feed = driver.find_element_by_xpath('/html/body/div[1]/section/main/article/div[1]/div/div/div[1]/div[1]/a') 
   first_feed.click() 
-  time.sleep(1)
+  time.sleep(10)
+  
+  # 6. 좋아요 작업
   driver.find_element_by_xpath('/html/body/div[6]/div[3]/div/article/div/div[2]/div/div/div[2]/section[1]/span[1]/button').click()
-  
-  # 6. 좋아요 작업 - 입력한 횟수만큼 반복 작업 (여기서부터 다음 누르면 될 듯) 
-  # for idx in range(insta_cnt): 
-  #   div = driver.find_element_by_xpath('/html/body/div[5]/div[2]/div/article/div') 
-  #   div = div.find_element_by_xpath('/html/body/div[5]/div[2]/div/article/div[3]') 
-  #   like_btn = div.find_element_by_tag_name('button') #좋아요 버튼 
-    
-  #   like_btn.click() #좋아요 클릭 
-  #   print('{}번째 피드 좋아요 작업 완료'.format(idx + 1))
-    
-  #   # 너무 빠르게 작업을 할 경우 많은 양의 작업을 하게 되어 인스타그램측에서 계정 정지나 경고를 할 수 있으니
-  #   # 작업과 다음 작업 사이의 속도를 조절하기 위해 20초 이상을 설정해주세요. 
-  #   time.sleep(5)
 
-  #   # 7. 좋아요 작업 - 다음 피드로 이동 
-  #   if idx < insta_cnt: 
-  #     next_feed = driver.find_element_by_link_text('다음') 
-  #     next_feed.click()
+  idx = 1
+  if idx < insta_cnt: 
+    next_feed = driver.find_element_by_xpath('/html/body/div[6]/div[2]/div/div/button') 
+    next_feed.click()
+    driver.find_element_by_xpath('/html/body/div[6]/div[3]/div/article/div/div[2]/div/div/div[2]/section[1]/span[1]/button').click()
+    time.sleep(5)
+    idx += 1
   
-  # print('모든 작업 완료') 
-  # driver.quit()
+  print('모든 작업 완료') 
+  driver.quit()
 
 bot()
