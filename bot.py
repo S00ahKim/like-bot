@@ -86,18 +86,36 @@ def auto_like(driver, tag, cnt):
   first_feed.click() 
   time.sleep(5)
   # 좋아요 작업
-  driver.find_element_by_xpath('/html/body/div[6]/div[3]/div/article/div/div[2]/div/div/div[2]/section[1]/span[1]/button').click()
+  try:
+    check_if_liked(driver)
+    driver.find_element_by_xpath('/html/body/div[6]/div[3]/div/article/div/div[2]/div/div/div[2]/section[1]/span[1]/button').click()
+  except Exception as e:
+    print(e)
+    idx -= 1
   # 다음 피드 클릭
   driver.find_element_by_xpath('/html/body/div[6]/div[2]/div/div/button').click()
   time.sleep(3)
   print('tag: %s, cnt: %s' % (tag, idx))
 
   while idx < cnt: 
-    driver.find_element_by_xpath('/html/body/div[6]/div[3]/div/article/div/div[2]/div/div/div[2]/section[1]/span[1]/button').click()
-    driver.find_element_by_xpath('/html/body/div[6]/div[2]/div/div[2]/button').click()
-    time.sleep(3)
-    idx += 1
-    print('tag: %s, cnt: %s' % (tag, idx))
+    try:
+      check_if_liked(driver)
+      driver.find_element_by_xpath('/html/body/div[6]/div[3]/div/article/div/div[2]/div/div/div[2]/section[1]/span[1]/button').click()
+      idx += 1
+      print('tag: %s, cnt: %s' % (tag, idx))
+    except Exception as e:
+      print(e)
+    finally:
+      driver.find_element_by_xpath('/html/body/div[6]/div[2]/div/div[2]/button').click()
+      time.sleep(3)
+
+def check_if_liked(driver):
+  _likes = driver.find_elements_by_css_selector("[aria-label=좋아요]")
+  _like = [x for x in _likes if int(x.get_attribute('width')) > 20]
+  if len(_like) == 0:
+    raise Exception('Already Done!')
+  if _like[0].get_attribute('color') != str('#8e8e8e'):
+    raise Exception('Already Done!')
 
 def main():
   num_of_likes = int(input('각 태그에 대해 몇 개의 좋아요를 작업할까요? :'))
