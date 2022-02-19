@@ -1,18 +1,18 @@
 # -*- coding: utf-8 -*-
 
-from nis import cat
 from selenium import webdriver
 import inspect, os, platform, time
 from config import exec_options
 
-def bot(): 
-  #필요한 변수 정의 
-  insta_id = exec_options['id']
-  insta_pw = exec_options['password']
-  insta_tag = exec_options['tags'][0]
-  insta_cnt = 2
+def bot(num_of_likes):
+  insta_tags = exec_options['tags']
+  driver = get_chrome_driver()
+  login(driver)
+  for tag in insta_tags:
+    auto_like(driver, tag, num_of_likes)
+  driver.quit()
 
-  #크롬드라이버 로딩 
+def get_chrome_driver():
   options = webdriver.ChromeOptions() 
   options.add_argument('--disable-gpu') 
 
@@ -26,14 +26,18 @@ def bot():
   
   driver = webdriver.Chrome(driver_path, options=options) 
   driver.implicitly_wait(10)
+  return driver
 
-  ### 인스타그램 자동 좋아요 작업 ### 
-  # 1. 인스타그램 로그인 페이지로 이동 
+def login(driver):
+  insta_id = exec_options['id']
+  insta_pw = exec_options['password']
+
+  # 인스타그램 로그인 페이지로 이동 
   driver.get('https://www.instagram.com/?hl=ko') 
   print('로그인중....') 
   time.sleep(5)
 
-  # 2. 아이디 입력창을 찾아서 위에서 입력받은 아이디(insta_id)값 입력
+  # 아이디 입력창을 찾아서 위에서 입력받은 아이디(insta_id)값 입력
   try:
     id_input = driver.find_element_by_xpath('/html/body/div[1]/section/main/article/div[2]/div[1]/div/form/div/div[1]/div/label/input') 
     id_input.click() #입력창 클릭 
@@ -43,7 +47,7 @@ def bot():
     id_input.click() #입력창 클릭       
     id_input.send_keys(insta_id) #아이디 입력 
   
-  # 2-1. 패스워드 입력창을 찾아서 위에서 입력받은 패스워드(insta_pw)값 입력 
+  # 패스워드 입력창을 찾아서 위에서 입력받은 패스워드(insta_pw)값 입력 
   try:
     pw_input = driver.find_element_by_xpath('/html/body/div[1]/section/main/article/div[2]/div[1]/div/form/div/div[2]/div/label/input') 
     pw_input.click() 
@@ -53,7 +57,7 @@ def bot():
     pw_input.click() 
     pw_input.send_keys(insta_pw) 
   
-  # 3. 로그인 버튼 클릭 
+  # 로그인 버튼 클릭 
   login_btn = driver.find_element_by_xpath('//*[@id="loginForm"]/div/div[3]/button') 
   login_btn.click() 
   
@@ -69,28 +73,35 @@ def bot():
   alert_later = driver.find_element_by_xpath('/html/body/div[5]/div/div/div/div[3]/button[2]')
   alert_later.click()
   time.sleep(1)
+  print('로그인 완료')
 
+def auto_like(driver, tag, cnt):
   # 검색어 입력
-  driver.get('https://www.instagram.com/explore/tags/' + insta_tag)
+  driver.get('https://www.instagram.com/explore/tags/' + tag)
   time.sleep(5)
 
-  # 5. 인기게시물 첫번째 피드 선택
+  # 인기게시물 첫번째 피드 선택
+  idx = 1
   first_feed = driver.find_element_by_xpath('/html/body/div[1]/section/main/article/div[1]/div/div/div[1]/div[1]/a') 
   first_feed.click() 
-  time.sleep(10)
-  
-  # 6. 좋아요 작업
+  time.sleep(5)
+  # 좋아요 작업
   driver.find_element_by_xpath('/html/body/div[6]/div[3]/div/article/div/div[2]/div/div/div[2]/section[1]/span[1]/button').click()
+  # 다음 피드 클릭
+  driver.find_element_by_xpath('/html/body/div[6]/div[2]/div/div/button').click()
+  time.sleep(3)
+  print('tag: %s, cnt: %s' % (tag, idx))
 
-  idx = 1
-  if idx < insta_cnt: 
-    next_feed = driver.find_element_by_xpath('/html/body/div[6]/div[2]/div/div/button') 
-    next_feed.click()
+  while idx < cnt: 
     driver.find_element_by_xpath('/html/body/div[6]/div[3]/div/article/div/div[2]/div/div/div[2]/section[1]/span[1]/button').click()
-    time.sleep(5)
+    driver.find_element_by_xpath('/html/body/div[6]/div[2]/div/div[2]/button').click()
+    time.sleep(3)
     idx += 1
-  
-  print('모든 작업 완료') 
-  driver.quit()
+    print('tag: %s, cnt: %s' % (tag, idx))
 
-bot()
+def main():
+  num_of_likes = int(input('각 태그에 대해 몇 개의 좋아요를 작업할까요? :'))
+  bot(num_of_likes)
+
+if __name__ == '__main__':
+  main()
