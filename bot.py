@@ -110,7 +110,7 @@ def auto_like(driver, tag, cnt):
       time.sleep(3)
 
 def check_if_liked(driver):
-  _likes = driver.find_elements_by_css_selector("[aria-label=좋아요]")
+  _likes = driver.find_elements_by_css_selector("svg[aria-label=좋아요]")
   _like = [x for x in _likes if int(x.get_attribute('width')) > 20]
   if len(_like) == 0:
     raise Exception('Already Done!')
